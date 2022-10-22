@@ -24,34 +24,4 @@ public class PolyglotConfig {
         return messageFileName;
     }
 
-    public static class PolyglotConfigBuilder {
-
-        private String defaultLanguage;
-        private String messageDirectory;
-        private String messageFileName;
-
-        public PolyglotConfigBuilder() {
-            this.defaultLanguage = "en";
-            this.messageDirectory = "messages";
-            this.messageFileName = "messages_{language}.yml";
-        }
-
-        public void defaultLanguage(String defaultLanguage) {
-            this.defaultLanguage = defaultLanguage;
-        }
-
-        public void messageDirectory(String messageDirectory) {
-            this.messageDirectory = messageDirectory;
-        }
-
-        public void messageFileName(String messageFileName) {
-            this.messageFileName = messageFileName;
-        }
-
-        public PolyglotConfig build() {
-            return new PolyglotConfig(defaultLanguage, messageDirectory, messageFileName);
-        }
-
-    }
-
 }
