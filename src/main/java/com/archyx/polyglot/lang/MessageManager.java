@@ -143,4 +143,8 @@ public class MessageManager implements Listener {
         polyglot.getPlugin().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
     }
 
+    public Locale getDefaultLanguage() {
+        return defaultLanguage;
+    }
+
 }
