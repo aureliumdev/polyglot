@@ -15,10 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +27,7 @@ public class MessageManager implements Listener {
     private LangMessages embeddedMessages;
     private final Locale defaultLanguage;
     private final String defaultLanguageCode;
+    private final List<MessageUpdate> messageUpdates;
     private final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public MessageManager(Polyglot polyglot) {
@@ -36,6 +35,7 @@ public class MessageManager implements Listener {
         this.defaultLanguageCode = polyglot.getConfig().getDefaultLanguage();
         this.defaultLanguage = new Locale(defaultLanguageCode);
         this.langMessagesMap = new HashMap<>();
+        this.messageUpdates = new ArrayList<>();
     }
 
     @Nullable
@@ -79,6 +79,10 @@ public class MessageManager implements Listener {
 
     public Set<Locale> getLoadedLanguages() {
         return langMessagesMap.keySet();
+    }
+
+    public void registerMessageUpdate(MessageUpdate messageUpdate) {
+        messageUpdates.add(messageUpdate);
     }
 
     public void loadMessages() {
@@ -139,6 +143,64 @@ public class MessageManager implements Listener {
         }
 
         this.embeddedMessages = langMessages;
+    }
+
+    private FileConfiguration updateFile(File file, FileConfiguration config, String language) {
+        if (!config.contains("file_version")) {
+            return YamlConfiguration.loadConfiguration(file);
+        }
+        String defaultFileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", defaultLanguageCode);
+        InputStream stream = polyglot.getPlugin().getResource(polyglot.getConfig().getMessageDirectory() + "/" + defaultFileName);
+        if (stream != null) {
+            int currentVersion = config.getInt("file_version");
+            FileConfiguration imbConfig = YamlConfiguration.loadConfiguration(new InputStreamReader(stream, StandardCharsets.UTF_8));
+            int imbVersion = imbConfig.getInt("file_version");
+            //If versions do not match
+            if (currentVersion != imbVersion) {
+                try {
+                    ConfigurationSection configSection = imbConfig.getConfigurationSection("");
+                    int keysAdded = 0;
+                    if (configSection != null) {
+                        for (String key : configSection.getKeys(true)) {
+                            if (!configSection.isConfigurationSection(key)) {
+                                if (!config.contains(key)) {
+                                    config.set(key, imbConfig.get(key));
+                                    keysAdded++;
+                                }
+                            }
+                        }
+                        // Messages to override
+                        for (MessageUpdate update : messageUpdates) {
+                            if (currentVersion < update.getVersion() && imbVersion >= update.getVersion()) {
+                                ConfigurationSection section = imbConfig.getConfigurationSection(update.getPath());
+                                if (section != null) {
+                                    for (String key : section.getKeys(false)) {
+                                        config.set(section.getCurrentPath() + "." + key, section.getString(key));
+                                    }
+                                    if (update.getMessage() != null) {
+                                        polyglot.getPlugin().getLogger().warning("messages_" + language + ".yml was changed: " + update.getMessage());
+                                    }
+                                } else {
+                                    Object value = imbConfig.get(update.getPath());
+                                    if (value != null) {
+                                        config.set(update.getPath(), value);
+                                        if (update.getMessage() != null) {
+                                            polyglot.getPlugin().getLogger().warning("messages_" + language + ".yml was changed: " + update.getMessage());
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    config.set("file_version", imbVersion);
+                    config.save(file);
+                    polyglot.getPlugin().getLogger().info("messages_" + language + ".yml was updated to a new file version, " + keysAdded + " new keys were added.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return YamlConfiguration.loadConfiguration(file);
     }
 
     private String processMessage(String input) {
