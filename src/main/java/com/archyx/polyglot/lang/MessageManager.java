@@ -5,6 +5,7 @@ import com.archyx.polyglot.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -18,6 +19,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MessageManager implements Listener {
 
@@ -26,6 +29,7 @@ public class MessageManager implements Listener {
     private LangMessages embeddedMessages;
     private final Locale defaultLanguage;
     private final String defaultLanguageCode;
+    private final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public MessageManager(Polyglot polyglot) {
         this.polyglot = polyglot;
@@ -140,7 +144,25 @@ public class MessageManager implements Listener {
     private String processMessage(String input) {
         MiniMessage mm = MiniMessage.miniMessage();
         Component component = mm.deserialize(input);
-        return LegacyComponentSerializer.legacySection().serialize(component);
+        String output = LegacyComponentSerializer.legacySection().serialize(component);
+        output = applyColorCodes(output);
+        return output;
+    }
+
+    private String applyColorCodes(String message) {
+        Matcher matcher = hexPattern.matcher(message);
+        StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            char COLOR_CHAR = ChatColor.COLOR_CHAR;
+            matcher.appendReplacement(buffer, COLOR_CHAR + "x"
+                    + COLOR_CHAR + group.charAt(0) + COLOR_CHAR + group.charAt(1)
+                    + COLOR_CHAR + group.charAt(2) + COLOR_CHAR + group.charAt(3)
+                    + COLOR_CHAR + group.charAt(4) + COLOR_CHAR + group.charAt(5)
+            );
+        }
+        message = matcher.appendTail(buffer).toString();
+        return TextUtil.replace(message, "&", "§");
     }
 
     private void generateMessageFiles() {
