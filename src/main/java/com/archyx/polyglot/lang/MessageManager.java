@@ -17,6 +17,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 public class MessageManager implements Listener {
 
@@ -70,6 +71,10 @@ public class MessageManager implements Listener {
             throw new IllegalArgumentException("Message with message key " + messageKey.getPath() + " not found for default language");
         }
         return message;
+    }
+
+    public Set<Locale> getLoadedLanguages() {
+        return langMessagesMap.keySet();
     }
 
     public void loadMessages() {
