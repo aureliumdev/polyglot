@@ -14,7 +14,9 @@ repositories {
 dependencies {
     implementation("org.jetbrains:annotations:23.0.0")
     implementation("net.kyori:adventure-text-minimessage:4.11.0")
-    implementation("net.kyori:adventure-platform-bukkit:4.1.2")
+    implementation("net.kyori:adventure-api:4.13.0")
+    implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")
+    implementation("org.spongepowered:configurate-yaml:4.1.2")
     compileOnly("org.spigotmc:spigot-api:1.19.2-R0.1-SNAPSHOT")
 }
 
