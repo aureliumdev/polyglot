@@ -2,22 +2,21 @@ package com.archyx.polyglot;
 
 import com.archyx.polyglot.config.PolyglotConfig;
 import com.archyx.polyglot.lang.MessageManager;
-import org.bukkit.plugin.Plugin;
 
 public class Polyglot {
 
-    private final Plugin plugin;
     private final PolyglotConfig config;
     private final MessageManager messageManager;
+    private final PolyglotProvider provider;
 
-    public Polyglot(Plugin plugin, PolyglotConfig config) {
-        this.plugin = plugin;
+    public Polyglot(PolyglotProvider provider, PolyglotConfig config) {
+        this.provider = provider;
         this.config = config;
         this.messageManager = new MessageManager(this);
     }
 
-    public Plugin getPlugin() {
-        return plugin;
+    public PolyglotProvider getProvider() {
+        return provider;
     }
 
     public PolyglotConfig getConfig() {
