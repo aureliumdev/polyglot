@@ -18,7 +18,7 @@ dependencies {
 }
 
 group = "com.archyx"
-version = "1.1.0"
+version = "1.1.1"
 description = "Polyglot"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
