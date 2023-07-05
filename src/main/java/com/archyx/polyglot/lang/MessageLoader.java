@@ -38,7 +38,7 @@ public class MessageLoader {
         LangMessages langMessages = loadFromNode(root, locale);
         long end = System.nanoTime();
         // Print time taken in ms
-        polyglot.getProvider().logInfo("Loaded message file in " + (end - start) / 1000000.0 + "ms");
+        polyglot.getProvider().logInfo("Loaded " + file.getName() + " in " + String.format("%.2f", (end - start) / 1000000.0) + "ms");
         return langMessages;
     }
 
@@ -142,7 +142,6 @@ public class MessageLoader {
         for (Map.Entry<String, String> entry : replacements.getReplacements().entrySet()) {
             String toReplace = entry.getKey();
             String replacement = messageMap.get(MessageKey.of(entry.getValue()));
-            polyglot.getProvider().logInfo("Replacing " + toReplace + " with " + replacement);
             if (replacement != null) {
                 input = input.replace(toReplace, replacement);
             }
