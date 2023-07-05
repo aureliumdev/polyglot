@@ -5,11 +5,13 @@ public class PolyglotConfig {
     private final String defaultLanguage;
     private final String messageDirectory;
     private final String messageFileName;
+    private final MessageReplacements messageReplacements;
 
-    public PolyglotConfig(String defaultLanguage, String messageDirectory, String messageFileName) {
+    public PolyglotConfig(String defaultLanguage, String messageDirectory, String messageFileName, MessageReplacements messageReplacements) {
         this.defaultLanguage = defaultLanguage;
         this.messageDirectory = messageDirectory;
         this.messageFileName = messageFileName;
+        this.messageReplacements = messageReplacements;
     }
 
     public String getDefaultLanguage() {
@@ -22,6 +24,10 @@ public class PolyglotConfig {
 
     public String getMessageFileName() {
         return messageFileName;
+    }
+
+    public MessageReplacements getMessageReplacements() {
+        return messageReplacements;
     }
 
 }

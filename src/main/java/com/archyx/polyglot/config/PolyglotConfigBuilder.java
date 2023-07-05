@@ -1,15 +1,19 @@
 package com.archyx.polyglot.config;
 
+import java.util.HashMap;
+
 public class PolyglotConfigBuilder {
 
     private String defaultLanguage;
     private String messageDirectory;
     private String messageFileName;
+    private MessageReplacements messageReplacements;
 
     public PolyglotConfigBuilder() {
         this.defaultLanguage = "en";
         this.messageDirectory = "messages";
         this.messageFileName = "messages_{language}.yml";
+        this.messageReplacements = new MessageReplacements(new HashMap<>());
     }
 
     public PolyglotConfigBuilder defaultLanguage(String defaultLanguage) {
@@ -27,8 +31,13 @@ public class PolyglotConfigBuilder {
         return this;
     }
 
+    public PolyglotConfigBuilder messageReplacements(MessageReplacements messageReplacements) {
+        this.messageReplacements = messageReplacements;
+        return this;
+    }
+
     public PolyglotConfig build() {
-        return new PolyglotConfig(defaultLanguage, messageDirectory, messageFileName);
+        return new PolyglotConfig(defaultLanguage, messageDirectory, messageFileName, messageReplacements);
     }
 
 }

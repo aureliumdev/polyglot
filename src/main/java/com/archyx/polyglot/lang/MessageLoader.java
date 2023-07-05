@@ -1,6 +1,7 @@
 package com.archyx.polyglot.lang;
 
 import com.archyx.polyglot.Polyglot;
+import com.archyx.polyglot.config.MessageReplacements;
 import com.archyx.polyglot.util.TextUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -16,9 +17,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,7 +38,7 @@ public class MessageLoader {
         LangMessages langMessages = loadFromNode(root, locale);
         long end = System.nanoTime();
         // Print time taken in ms
-        System.out.println("Loaded message file in " + (end - start) / 1000000.0 + "ms");
+        polyglot.getProvider().logInfo("Loaded message file in " + (end - start) / 1000000.0 + "ms");
         return langMessages;
     }
 
@@ -57,20 +56,24 @@ public class MessageLoader {
     private LangMessages loadFromNode(CommentedConfigurationNode root, Locale locale) {
         Map<MessageKey, String> messageMap = new HashMap<>();
 
-        loadChildrenRec(root, messageMap);
+        loadChildrenRec(root, messageMap, 0);
 
         return new LangMessages(locale, messageMap);
     }
 
-    private void loadChildrenRec(ConfigurationNode node, Map<MessageKey, String> messageMap) {
+    private void loadChildrenRec(ConfigurationNode node, Map<MessageKey, String> messageMap, int depth) {
+        List<ConfigurationNode> nodes = new ArrayList<>(node.childrenMap().values().stream().map(o -> (ConfigurationNode) o).toList());
+        // Sort nodes to make replacements load first
+        nodes.sort(new NodePrioritySorter(polyglot.getConfig().getMessageReplacements(), depth));
+
         for (ConfigurationNode child : node.childrenMap().values()) {
             String message = child.getString();
             if (message != null) { // Node is a message
                 MessageKey key = MessageKey.of(formatPath(child.path()));
-                message = processMessage(message); // Apply color and formatting
+                message = processMessage(message, messageMap); // Apply color and formatting
                 messageMap.put(key, message);
             } else { // Node is a section
-                loadChildrenRec(child, messageMap);
+                loadChildrenRec(child, messageMap, depth + 1);
             }
         }
     }
@@ -108,7 +111,8 @@ public class MessageLoader {
         return loader.load();
     }
 
-    private String processMessage(String input) {
+    private String processMessage(String input, Map<MessageKey, String> messageMap) {
+        input = applyReplacements(input, messageMap);
         MiniMessage mm = MiniMessage.miniMessage();
         Component component = mm.deserialize(input);
         String output = LegacyComponentSerializer.legacySection().serialize(component);
@@ -130,6 +134,19 @@ public class MessageLoader {
         }
         message = matcher.appendTail(buffer).toString();
         return TextUtil.replace(message, "&", "§");
+    }
+
+    private String applyReplacements(String input, Map<MessageKey, String> messageMap) {
+        MessageReplacements replacements = polyglot.getConfig().getMessageReplacements();
+
+        for (Map.Entry<String, String> entry : replacements.getReplacements().entrySet()) {
+            String toReplace = "{" + entry.getKey() + "}";
+            String replacement = messageMap.get(MessageKey.of(entry.getValue()));
+            if (replacement != null) {
+                input = input.replace(toReplace, replacement);
+            }
+        }
+        return input;
     }
 
 }
