@@ -46,9 +46,12 @@ public class FileUpdater {
             int embeddedFileVersion = embeddedRoot.node("file_version").getInt();
 
             int keysAdded = 0;
-            if (userFileVersion != embeddedFileVersion) {
-                keysAdded = updateChildren(embeddedRoot, userRoot, keysAdded); // Recursively update messages
+            // If user file is up-to-date, return
+            if (userFileVersion == embeddedFileVersion) {
+                return;
             }
+
+            keysAdded = updateChildren(embeddedRoot, userRoot, keysAdded); // Recursively update messages
 
             // Apply message update overrides
             applyMessageUpdates(messageUpdates, userRoot, embeddedRoot, userFileVersion, embeddedFileVersion, language);
