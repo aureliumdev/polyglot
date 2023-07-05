@@ -25,11 +25,11 @@ public class NodePrioritySorter implements Comparator<ConfigurationNode> {
                 // Check if either node is a replacement
                 if (getKey(o1).equals(replacePath[depth])) {
                     // Return higher priority for o1
-                    return 1;
+                    return -1;
                 }
                 else if (getKey(o2).equals(replacePath[depth])) {
                     // Return higher priority for o2
-                    return -1;
+                    return 1;
                 }
             }
         }
