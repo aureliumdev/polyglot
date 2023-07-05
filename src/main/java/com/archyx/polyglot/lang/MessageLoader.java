@@ -140,7 +140,7 @@ public class MessageLoader {
         MessageReplacements replacements = polyglot.getConfig().getMessageReplacements();
 
         for (Map.Entry<String, String> entry : replacements.getReplacements().entrySet()) {
-            String toReplace = "{" + entry.getKey() + "}";
+            String toReplace = entry.getKey();
             String replacement = messageMap.get(MessageKey.of(entry.getValue()));
             if (replacement != null) {
                 input = input.replace(toReplace, replacement);
