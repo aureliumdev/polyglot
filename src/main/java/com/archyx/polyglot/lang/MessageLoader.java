@@ -142,6 +142,7 @@ public class MessageLoader {
         for (Map.Entry<String, String> entry : replacements.getReplacements().entrySet()) {
             String toReplace = entry.getKey();
             String replacement = messageMap.get(MessageKey.of(entry.getValue()));
+            polyglot.getProvider().logInfo("Replacing " + toReplace + " with " + replacement);
             if (replacement != null) {
                 input = input.replace(toReplace, replacement);
             }
