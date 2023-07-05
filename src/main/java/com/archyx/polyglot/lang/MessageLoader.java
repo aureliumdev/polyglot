@@ -66,7 +66,7 @@ public class MessageLoader {
         // Sort nodes to make replacements load first
         nodes.sort(new NodePrioritySorter(polyglot.getConfig().getMessageReplacements(), depth));
 
-        for (ConfigurationNode child : node.childrenMap().values()) {
+        for (ConfigurationNode child : nodes) {
             String message = child.getString();
             if (message != null) { // Node is a message
                 MessageKey key = MessageKey.of(formatPath(child.path()));
