@@ -63,7 +63,7 @@ public class MessageManager {
             message = embeddedMessages.getMessage(messageKey);
         }
         if (message == null) {
-            throw new IllegalArgumentException("Message with message key " + messageKey.getPath() + " not found for default language");
+            return messageKey.getPath();
         }
         return message;
     }
