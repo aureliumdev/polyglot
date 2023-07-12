@@ -117,6 +117,8 @@ public class MessageLoader {
         Component component = mm.deserialize(input);
         String output = LegacyComponentSerializer.legacySection().serialize(component);
         output = applyColorCodes(output);
+        // Replace newlines
+        output = output.replace("\\n", "\n");
         return output;
     }
 
