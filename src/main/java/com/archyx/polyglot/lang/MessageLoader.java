@@ -115,7 +115,8 @@ public class MessageLoader {
         input = applyReplacements(input, messageMap);
         MiniMessage mm = MiniMessage.miniMessage();
         Component component = mm.deserialize(input);
-        String output = LegacyComponentSerializer.legacySection().serialize(component);
+        String output = LegacyComponentSerializer.builder().hexColors().build()
+                .serialize(component);
         output = applyColorCodes(output);
         // Replace newlines
         output = output.replace("\\n", "\n");
