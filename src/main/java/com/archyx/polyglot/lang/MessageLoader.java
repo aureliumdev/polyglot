@@ -70,7 +70,10 @@ public class MessageLoader {
             String message = child.getString();
             if (message != null) { // Node is a message
                 MessageKey key = MessageKey.of(formatPath(child.path()));
-                message = processMessage(message, messageMap); // Apply color and formatting
+                // Make sure the name of the node key is not excluded from processing
+                if (!polyglot.getConfig().getProcessExcluded().contains(String.valueOf(child.key()))) {
+                    message = processMessage(message, messageMap); // Apply color and formatting
+                }
                 messageMap.put(key, message);
             } else { // Node is a section
                 loadChildrenRec(child, messageMap, depth + 1);
