@@ -207,6 +207,7 @@ public class TextUtil {
     }
 
     public static String applyColor(String input) {
+        input = replace(input, "§", "&");
         MiniMessage mm = MiniMessage.miniMessage();
         Component component = mm.deserialize(input);
         String output = LegacyComponentSerializer.builder().hexColors().build()
