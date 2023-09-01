@@ -1,10 +1,18 @@
 package com.archyx.polyglot.util;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class TextUtil {
+
+    private static final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public static String replace(String source, String os, String ns) {
         if (source == null) {
@@ -198,5 +206,28 @@ public class TextUtil {
         return capitalizeWord(str, null);
     }
 
+    public static String applyColor(String input) {
+        MiniMessage mm = MiniMessage.miniMessage();
+        Component component = mm.deserialize(input);
+        String output = LegacyComponentSerializer.builder().hexColors().build()
+                .serialize(component);
+        return applyLegacyColorCodes(output);
+    }
+
+    public static String applyLegacyColorCodes(String message) {
+        Matcher matcher = hexPattern.matcher(message);
+        StringBuilder buffer = new StringBuilder(message.length() + 4 * 8);
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            char COLOR_CHAR = '§';
+            matcher.appendReplacement(buffer, COLOR_CHAR + "x"
+                    + COLOR_CHAR + group.charAt(0) + COLOR_CHAR + group.charAt(1)
+                    + COLOR_CHAR + group.charAt(2) + COLOR_CHAR + group.charAt(3)
+                    + COLOR_CHAR + group.charAt(4) + COLOR_CHAR + group.charAt(5)
+            );
+        }
+        message = matcher.appendTail(buffer).toString();
+        return TextUtil.replace(message, "&", "§");
+    }
 
 }

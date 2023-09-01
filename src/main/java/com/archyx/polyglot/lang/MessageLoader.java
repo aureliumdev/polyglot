@@ -3,9 +3,6 @@ package com.archyx.polyglot.lang;
 import com.archyx.polyglot.Polyglot;
 import com.archyx.polyglot.config.MessageReplacements;
 import com.archyx.polyglot.util.TextUtil;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -18,7 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MessageLoader {
@@ -116,30 +112,10 @@ public class MessageLoader {
 
     private String processMessage(String input, Map<MessageKey, String> messageMap) {
         input = applyReplacements(input, messageMap);
-        MiniMessage mm = MiniMessage.miniMessage();
-        Component component = mm.deserialize(input);
-        String output = LegacyComponentSerializer.builder().hexColors().build()
-                .serialize(component);
-        output = applyColorCodes(output);
+        String output = TextUtil.applyColor(input);
         // Replace newlines
         output = output.replace("\\n", "\n");
         return output;
-    }
-
-    private String applyColorCodes(String message) {
-        Matcher matcher = hexPattern.matcher(message);
-        StringBuilder buffer = new StringBuilder(message.length() + 4 * 8);
-        while (matcher.find()) {
-            String group = matcher.group(1);
-            char COLOR_CHAR = '§';
-            matcher.appendReplacement(buffer, COLOR_CHAR + "x"
-                    + COLOR_CHAR + group.charAt(0) + COLOR_CHAR + group.charAt(1)
-                    + COLOR_CHAR + group.charAt(2) + COLOR_CHAR + group.charAt(3)
-                    + COLOR_CHAR + group.charAt(4) + COLOR_CHAR + group.charAt(5)
-            );
-        }
-        message = matcher.appendTail(buffer).toString();
-        return TextUtil.replace(message, "&", "§");
     }
 
     private String applyReplacements(String input, Map<MessageKey, String> messageMap) {
