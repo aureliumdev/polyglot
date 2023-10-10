@@ -85,11 +85,7 @@ public class MessageManager {
         }
 
         File messagesDir = new File(polyglot.getProvider().getDataFolder() + "/" + polyglot.getConfig().getMessageDirectory());
-        String defaultFileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", defaultLanguageCode);
-        File defaultMessage = new File(polyglot.getProvider().getDataFolder() + "/" + polyglot.getConfig().getMessageDirectory() + "/" + defaultFileName);
-        if (!messagesDir.exists() || !defaultMessage.exists()) {
-            generateMessageFiles();
-        }
+        generateMessageFiles();
         File[] messageFiles = messagesDir.listFiles();
         if (messageFiles == null) return;
         int numLoaded = 0;
@@ -120,7 +116,10 @@ public class MessageManager {
     private void generateMessageFiles() {
         for (String code : polyglot.getConfig().getProvidedLanguages()) {
             String fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", code);
-            polyglot.getProvider().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
+            File file = new File(polyglot.getProvider().getDataFolder(), polyglot.getConfig().getMessageDirectory() + "/" + fileName);
+            if (!file.exists()) {
+                polyglot.getProvider().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
+            }
         }
     }
 
