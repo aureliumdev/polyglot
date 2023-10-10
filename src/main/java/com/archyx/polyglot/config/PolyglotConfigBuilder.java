@@ -9,6 +9,7 @@ import java.util.List;
 public class PolyglotConfigBuilder {
 
     private String defaultLanguage;
+    private String[] providedLanguages;
     private String messageDirectory;
     private String messageFileName;
     private MessageReplacements messageReplacements;
@@ -16,6 +17,7 @@ public class PolyglotConfigBuilder {
 
     public PolyglotConfigBuilder() {
         this.defaultLanguage = "en";
+        this.providedLanguages = new String[] {"en"};
         this.messageDirectory = "messages";
         this.messageFileName = "messages_{language}.yml";
         this.messageReplacements = new MessageReplacements(new HashMap<>());
@@ -24,6 +26,11 @@ public class PolyglotConfigBuilder {
 
     public PolyglotConfigBuilder defaultLanguage(String defaultLanguage) {
         this.defaultLanguage = defaultLanguage;
+        return this;
+    }
+
+    public PolyglotConfigBuilder providedLanguages(String[] providedLanguages) {
+        this.providedLanguages = providedLanguages;
         return this;
     }
 
@@ -48,7 +55,7 @@ public class PolyglotConfigBuilder {
     }
 
     public PolyglotConfig build() {
-        return new PolyglotConfig(defaultLanguage, messageDirectory, messageFileName, messageReplacements, processExcluded);
+        return new PolyglotConfig(defaultLanguage, providedLanguages, messageDirectory, messageFileName, messageReplacements, processExcluded);
     }
 
 }

@@ -118,8 +118,10 @@ public class MessageManager {
     }
 
     private void generateMessageFiles() {
-        String fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", defaultLanguageCode);
-        polyglot.getProvider().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
+        for (String code : polyglot.getConfig().getProvidedLanguages()) {
+            String fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", code);
+            polyglot.getProvider().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
+        }
     }
 
     public Locale getDefaultLanguage() {
