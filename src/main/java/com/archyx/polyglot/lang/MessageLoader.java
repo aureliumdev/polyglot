@@ -33,8 +33,6 @@ public class MessageLoader {
 
         LangMessages langMessages = loadFromNode(root, locale);
         long end = System.nanoTime();
-        // Print time taken in ms
-        polyglot.getProvider().logInfo("Loaded " + file.getName() + " in " + String.format("%.2f", (end - start) / 1000000.0) + "ms");
         return langMessages;
     }
 
