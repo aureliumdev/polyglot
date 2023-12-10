@@ -143,7 +143,12 @@ public class MessageManager {
 
     private void generateMessageFiles() {
         for (String code : polyglot.getConfig().getProvidedLanguages()) {
-            String fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", code);
+            String fileName;
+            if (code.equals("global")) {
+                fileName = "global.yml";
+            } else {
+                fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", code);
+            }
             File file = new File(polyglot.getProvider().getDataFolder(), polyglot.getConfig().getMessageDirectory() + "/" + fileName);
             if (!file.exists()) {
                 polyglot.getProvider().saveResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName, false);
