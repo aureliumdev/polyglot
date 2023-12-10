@@ -84,13 +84,26 @@ public class MessageManager {
                 continue;
             }
             String path = TextUtil.replace(placeholder, "{", "", "}", "");
-            LangMessages lang = getLangMessages(locale);
-            if (lang != null) {
-                String replacedMsg = lang.getMessage(MessageKey.of(path));
+            String replacedMsg = getLangMessage(path, locale);
+            if (replacedMsg != null) {
                 message = TextUtil.replace(message, "{" + placeholder + "}", replacedMsg);
+            } else {
+                String globalMsg = getLangMessage(path, Locale.ROOT);
+                if (globalMsg != null) {
+                    message = TextUtil.replace(message, "{" + placeholder + "}", globalMsg);
+                }
             }
         }
         return message;
+    }
+
+    @Nullable
+    private String getLangMessage(String path, Locale locale) {
+        LangMessages lang = getLangMessages(locale);
+        if (lang != null) {
+            return lang.getMessage(MessageKey.of(path));
+        }
+        return null;
     }
 
     public Set<Locale> getLoadedLanguages() {
