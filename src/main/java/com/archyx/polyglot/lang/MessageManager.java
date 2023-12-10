@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class MessageManager {
 
@@ -48,7 +49,7 @@ public class MessageManager {
         }
     }
 
-    public String getDefaultMessage(MessageKey messageKey) {
+    public String getDefaultMessage(MessageKey key) {
         if (defaultLanguage == null) {
             throw new IllegalStateException("Default language has not been set");
         }
@@ -56,20 +57,27 @@ public class MessageManager {
         if (langMessages == null) {
             langMessages = embeddedMessages;
         }
-        String message = langMessages.getMessage(messageKey);
+        String message = langMessages.getMessage(key);
         if (message != null) {
             return message;
         } else {
-            message = embeddedMessages.getMessage(messageKey);
+            message = embeddedMessages.getMessage(key);
         }
-        if (message == null) {
-            return messageKey.getPath();
+        if (message != null) {
+            return message;
+        } else {
+            LangMessages global = getLangMessages(Locale.ROOT);
+            if (global != null) {
+                message = global.getMessage(key);
+            }
         }
-        return message;
+        return message != null ? message : key.getPath();
     }
 
     public Set<Locale> getLoadedLanguages() {
-        return langMessagesMap.keySet();
+        return langMessagesMap.keySet().stream()
+                .filter(locale -> !locale.equals(Locale.ROOT))
+                .collect(Collectors.toSet());
     }
 
     public void registerMessageUpdate(MessageUpdate messageUpdate) {
@@ -91,9 +99,15 @@ public class MessageManager {
         int numLoaded = 0;
         for (File file : messageFiles) {
             if (!file.getName().endsWith(".yml")) continue;
-            // Update the file if necessary
-            String language = file.getName().substring(file.getName().indexOf("_") + 1, file.getName().lastIndexOf("."));
-            attemptFileUpdate(file, language);
+
+            String fileName;
+            if (file.getName().equals("global.yml")) {
+                fileName = "global.yml";
+            } else {
+                String language = file.getName().substring(file.getName().indexOf("_") + 1, file.getName().lastIndexOf("."));
+                fileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", language);
+            }
+            attemptFileUpdate(file, fileName); // Update the file if necessary
 
             try {
                 // Load and add messages to map
@@ -109,8 +123,8 @@ public class MessageManager {
         polyglot.getProvider().logInfo("Loaded " + numLoaded + " message files");
     }
 
-    private void attemptFileUpdate(File file, String language) {
-        fileUpdater.updateFile(file, language, messageUpdates);
+    private void attemptFileUpdate(File file, String fileName) {
+        fileUpdater.updateFile(file, fileName, messageUpdates);
     }
 
     private void generateMessageFiles() {

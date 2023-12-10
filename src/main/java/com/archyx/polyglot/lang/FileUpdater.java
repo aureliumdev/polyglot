@@ -1,7 +1,6 @@
 package com.archyx.polyglot.lang;
 
 import com.archyx.polyglot.Polyglot;
-import com.archyx.polyglot.util.TextUtil;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
@@ -24,22 +23,21 @@ public class FileUpdater {
         this.messageLoader = messageLoader;
     }
 
-    public void updateFile(File file, String language, List<MessageUpdate> messageUpdates) {
+    public void updateFile(File file, String fileName, List<MessageUpdate> messageUpdates) {
         try {
             CommentedConfigurationNode userRoot = messageLoader.loadYamlFile(file);
-            String defaultFileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", language);
-            InputStream embeddedInputStream = polyglot.getProvider().getResource(polyglot.getConfig().getMessageDirectory() + "/" + defaultFileName);
+            InputStream embeddedInputStream = polyglot.getProvider().getResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName);
 
             if (embeddedInputStream == null) {
-                throw new IllegalArgumentException("No embedded message file found for language " + language);
+                throw new IllegalArgumentException("No embedded message file with name " + fileName);
             }
             CommentedConfigurationNode embeddedRoot = messageLoader.loadYamlFile(embeddedInputStream);
 
             if (userRoot.node("file_version").virtual()) { // If user file has no file_version
-                throw new IllegalArgumentException("Message file " + file.getName() + " is missing a file_version");
+                throw new IllegalArgumentException("Message file " + fileName + " is missing a file_version");
             }
             if (embeddedRoot.node("file_version").virtual()) { // If embedded file has no file_version
-                throw new IllegalStateException("Embedded message file for language " + language + " is missing a file_version");
+                throw new IllegalStateException("Embedded message file " + fileName + " is missing a file_version");
             }
 
             int userFileVersion = userRoot.node("file_version").getInt();
@@ -54,7 +52,7 @@ public class FileUpdater {
             keysAdded = updateChildren(embeddedRoot, userRoot, keysAdded); // Recursively update messages
 
             // Apply message update overrides
-            applyMessageUpdates(messageUpdates, userRoot, embeddedRoot, userFileVersion, embeddedFileVersion, language);
+            applyMessageUpdates(messageUpdates, userRoot, embeddedRoot, userFileVersion, embeddedFileVersion, fileName);
 
             // Set updated user file_version to embedded
             userRoot.node("file_version").set(embeddedFileVersion);
@@ -65,9 +63,9 @@ public class FileUpdater {
                     .build();
             loader.save(userRoot);
 
-            polyglot.getProvider().logInfo("messages_" + language + ".yml was updated to a new file version, " + keysAdded + " new keys were added.");
+            polyglot.getProvider().logInfo(fileName + " was updated to a new file version, " + keysAdded + " new keys were added.");
         } catch (Exception e) {
-            polyglot.getProvider().logWarn("Error updating file " + file.getName() + " for language " + language);
+            polyglot.getProvider().logWarn("Error updating file " + file.getName());
             e.printStackTrace();
         }
     }
@@ -91,7 +89,7 @@ public class FileUpdater {
         return keysAdded;
     }
 
-    private void applyMessageUpdates(List<MessageUpdate> messageUpdates, ConfigurationNode userRoot, ConfigurationNode embeddedRoot, int userVersion, int embeddedVersion, String language) throws SerializationException {
+    private void applyMessageUpdates(List<MessageUpdate> messageUpdates, ConfigurationNode userRoot, ConfigurationNode embeddedRoot, int userVersion, int embeddedVersion, String fileName) throws SerializationException {
         for (MessageUpdate update : messageUpdates) {
             if (userVersion < update.getVersion() && embeddedVersion >= update.getVersion()) {
                 NodePath path = convertToPath(update.getPath());
@@ -101,7 +99,7 @@ public class FileUpdater {
                 userNode.set(embeddedNode.raw()); // Set the user node to the value of the embedded node
 
                 if (update.getMessage() != null) {
-                    polyglot.getProvider().logWarn("messages_" + language + ".yml was changed: " + update.getMessage());
+                    polyglot.getProvider().logWarn(fileName + " was changed: " + update.getMessage());
                 }
             }
         }

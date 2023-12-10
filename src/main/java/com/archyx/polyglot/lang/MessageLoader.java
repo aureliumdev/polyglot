@@ -27,13 +27,10 @@ public class MessageLoader {
     }
 
     public LangMessages loadMessageFile(File file) throws Exception {
-        long start = System.nanoTime();
         Locale locale = getLocaleFromFile(file.getName());
         CommentedConfigurationNode root = loadYamlFile(file);
 
-        LangMessages langMessages = loadFromNode(root, locale);
-        long end = System.nanoTime();
-        return langMessages;
+        return loadFromNode(root, locale);
     }
 
     public LangMessages loadEmbeddedMessages(String defaultLanguageCode) throws Exception {
@@ -76,6 +73,9 @@ public class MessageLoader {
     }
 
     private Locale getLocaleFromFile(String fileName) {
+        if (fileName.equals("global.yml")) {
+            return Locale.ROOT;
+        }
         String localeName = fileName.substring(fileName.indexOf("_") + 1, fileName.lastIndexOf("."));
         return new Locale(localeName);
     }
