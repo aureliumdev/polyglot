@@ -2,6 +2,7 @@ package com.archyx.polyglot.lang;
 
 import com.archyx.polyglot.Polyglot;
 import com.archyx.polyglot.util.TextUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -65,13 +66,16 @@ public class MessageManager {
         } else {
             LangMessages global = getLangMessages(Locale.ROOT);
             if (global != null) {
-                message = replaceMessagePlaceholders(global.getMessage(key), locale);
+                message = global.getMessage(key);
+                if (message != null) {
+                    message = replaceMessagePlaceholders(message, locale);
+                }
             }
         }
         return message != null ? message : key.getPath();
     }
 
-    private String replaceMessagePlaceholders(String message, Locale locale) {
+    private String replaceMessagePlaceholders(@NotNull String message, Locale locale) {
         String[] placeholders = TextUtil.substringsBetween(message, "{", "}");
         for (String placeholder : placeholders) {
             // Only replace double curly brace placeholders
