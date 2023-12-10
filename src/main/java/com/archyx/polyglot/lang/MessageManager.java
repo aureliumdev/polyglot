@@ -68,14 +68,14 @@ public class MessageManager {
             if (global != null) {
                 message = global.getMessage(key);
                 if (message != null) {
-                    message = replaceMessagePlaceholders(message, locale);
+                    message = replaceMessagePlaceholders(message, locale, true);
                 }
             }
         }
         return message != null ? message : key.getPath();
     }
 
-    private String replaceMessagePlaceholders(@NotNull String message, Locale locale) {
+    private String replaceMessagePlaceholders(@NotNull String message, Locale locale, boolean allowGlobal) {
         String[] placeholders = TextUtil.substringsBetween(message, "{", "}");
         if (placeholders == null) return message;
         for (String placeholder : placeholders) {
@@ -87,9 +87,10 @@ public class MessageManager {
             String replacedMsg = getLangMessage(path, locale);
             if (replacedMsg != null) {
                 message = TextUtil.replace(message, "{" + placeholder + "}", replacedMsg);
-            } else {
+            } else if (allowGlobal) {
                 String globalMsg = getLangMessage(path, Locale.ROOT);
                 if (globalMsg != null) {
+                    globalMsg = replaceMessagePlaceholders(globalMsg, locale, false);
                     message = TextUtil.replace(message, "{" + placeholder + "}", globalMsg);
                 }
             }
