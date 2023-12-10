@@ -4,15 +4,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TextUtil {
 
     private static final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
+    private static final String[] EMPTY_STRING_ARRAY = {};
 
     public static String replace(String source, String os, String ns) {
         if (source == null) {
@@ -229,6 +228,47 @@ public class TextUtil {
         }
         message = matcher.appendTail(buffer).toString();
         return TextUtil.replace(message, "&", "§");
+    }
+
+    public static String[] substringsBetween(final String str, final String open, final String close) {
+        if (str == null || isEmpty(open) || isEmpty(close)) {
+            return null;
+        }
+        final int strLen = str.length();
+        if (strLen == 0) {
+            return EMPTY_STRING_ARRAY;
+        }
+        final int closeLen = close.length();
+        final int openLen = open.length();
+        final List<String> list = new ArrayList<>();
+        int pos = 0;
+        while (pos < strLen - closeLen) {
+            int start = str.indexOf(open, pos);
+            if (start < 0) {
+                break;
+            }
+            start += openLen;
+            int end = str.indexOf(close, start);
+            if (end < 0) {
+                break;
+            }
+
+            // Check if the substring is actually a double placeholder
+            boolean isDoublePlaceholder = str.startsWith(open, start);
+            if (isDoublePlaceholder) {
+                end = str.indexOf(close, end + closeLen);
+                if (end < 0) {
+                    break;
+                }
+            }
+
+            list.add(str.substring(start, end));
+            pos = end + closeLen;
+        }
+        if (list.isEmpty()) {
+            return null;
+        }
+        return list.toArray(EMPTY_STRING_ARRAY);
     }
 
 }

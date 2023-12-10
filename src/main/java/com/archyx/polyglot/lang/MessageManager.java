@@ -37,19 +37,16 @@ public class MessageManager {
 
     public String get(Locale language, MessageKey messageKey) {
         LangMessages langMessages = getLangMessages(language);
-        if (langMessages != null) {
+        if (langMessages != null && !language.equals(Locale.ROOT)) {
             String message = langMessages.getMessage(messageKey);
             if (message != null) {
                 return message;
-            } else {
-                return getDefaultMessage(messageKey);
             }
-        } else {
-            return getDefaultMessage(messageKey);
         }
+        return getDefaultMessage(messageKey, language);
     }
 
-    public String getDefaultMessage(MessageKey key) {
+    public String getDefaultMessage(MessageKey key, Locale locale) {
         if (defaultLanguage == null) {
             throw new IllegalStateException("Default language has not been set");
         }
@@ -68,10 +65,27 @@ public class MessageManager {
         } else {
             LangMessages global = getLangMessages(Locale.ROOT);
             if (global != null) {
-                message = global.getMessage(key);
+                message = replaceMessagePlaceholders(global.getMessage(key), locale);
             }
         }
         return message != null ? message : key.getPath();
+    }
+
+    private String replaceMessagePlaceholders(String message, Locale locale) {
+        String[] placeholders = TextUtil.substringsBetween(message, "{", "}");
+        for (String placeholder : placeholders) {
+            // Only replace double curly brace placeholders
+            if (!placeholder.startsWith("{") && !placeholder.endsWith("}")) {
+                continue;
+            }
+            String path = TextUtil.replace(placeholder, "{", "", "}", "");
+            LangMessages lang = getLangMessages(locale);
+            if (lang != null) {
+                String replacedMsg = lang.getMessage(MessageKey.of(path));
+                message = TextUtil.replace(message, "{" + placeholder + "}", replacedMsg);
+            }
+        }
+        return message;
     }
 
     public Set<Locale> getLoadedLanguages() {
