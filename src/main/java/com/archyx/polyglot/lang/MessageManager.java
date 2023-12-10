@@ -77,6 +77,7 @@ public class MessageManager {
 
     private String replaceMessagePlaceholders(@NotNull String message, Locale locale) {
         String[] placeholders = TextUtil.substringsBetween(message, "{", "}");
+        if (placeholders == null) return message;
         for (String placeholder : placeholders) {
             // Only replace double curly brace placeholders
             if (!placeholder.startsWith("{") && !placeholder.endsWith("}")) {
