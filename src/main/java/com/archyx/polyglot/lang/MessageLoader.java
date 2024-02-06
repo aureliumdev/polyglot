@@ -30,7 +30,7 @@ public class MessageLoader {
         Locale locale = getLocaleFromFile(file.getName());
         CommentedConfigurationNode root = loadYamlFile(file);
 
-        return loadFromNode(root, locale);
+        return loadFromNode(root, locale, getLanguageCode(file.getName()));
     }
 
     public LangMessages loadEmbeddedMessages(String defaultLanguageCode) throws Exception {
@@ -41,15 +41,15 @@ public class MessageLoader {
         }
 
         CommentedConfigurationNode root = loadYamlFile(is);
-        return loadFromNode(root, new Locale(defaultLanguageCode));
+        return loadFromNode(root, new Locale(defaultLanguageCode), defaultLanguageCode);
     }
 
-    private LangMessages loadFromNode(CommentedConfigurationNode root, Locale locale) {
+    private LangMessages loadFromNode(CommentedConfigurationNode root, Locale locale, String languageCode) {
         Map<MessageKey, String> messageMap = new HashMap<>();
 
         loadChildrenRec(root, messageMap, 0);
 
-        return new LangMessages(locale, messageMap);
+        return new LangMessages(locale, languageCode, messageMap);
     }
 
     private void loadChildrenRec(ConfigurationNode node, Map<MessageKey, String> messageMap, int depth) {
@@ -76,8 +76,12 @@ public class MessageLoader {
         if (fileName.equals("global.yml")) {
             return Locale.ROOT;
         }
-        String localeName = fileName.substring(fileName.indexOf("_") + 1, fileName.lastIndexOf("."));
+        String localeName = getLanguageCode(fileName);
         return new Locale(localeName);
+    }
+
+    private String getLanguageCode(String fileName) {
+        return fileName.substring(fileName.indexOf("_") + 1, fileName.lastIndexOf("."));
     }
 
     private String formatPath(NodePath path) {

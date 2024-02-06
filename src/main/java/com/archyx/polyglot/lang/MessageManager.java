@@ -113,6 +113,12 @@ public class MessageManager {
                 .collect(Collectors.toSet());
     }
 
+    public List<String> getLanguageCodes() {
+        return langMessagesMap.values().stream()
+                .map(LangMessages::getLanguageCode)
+                .collect(Collectors.toList());
+    }
+
     public void registerMessageUpdate(MessageUpdate messageUpdate) {
         messageUpdates.add(messageUpdate);
     }
