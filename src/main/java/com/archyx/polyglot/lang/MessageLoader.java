@@ -62,8 +62,9 @@ public class MessageLoader {
             if (message != null) { // Node is a message
                 MessageKey key = MessageKey.of(formatPath(child.path()));
                 // Make sure the name of the node key is not excluded from processing
+                message = applyReplacements(message, messageMap);
                 if (!polyglot.getConfig().getProcessExcluded().contains(String.valueOf(child.key()))) {
-                    message = processMessage(message, messageMap); // Apply color and formatting
+                    message = processMessage(message); // Apply color and formatting
                 }
                 messageMap.put(key, message);
             } else { // Node is a section
@@ -112,8 +113,7 @@ public class MessageLoader {
         return loader.load();
     }
 
-    private String processMessage(String input, Map<MessageKey, String> messageMap) {
-        input = applyReplacements(input, messageMap);
+    private String processMessage(String input) {
         String output = TextUtil.applyColor(input);
         // Replace newlines
         output = output.replace("\\n", "\n");
