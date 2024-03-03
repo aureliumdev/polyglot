@@ -98,6 +98,7 @@ public class MessageLoader {
 
     private String formatPath(NodePath path) {
         StringBuilder builder = new StringBuilder();
+        if (path.size() == 0) return "";
         path.forEach(o -> {
             if (o instanceof String s) {
                 builder.append(s).append(".");
