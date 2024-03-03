@@ -63,7 +63,7 @@ public class MessageLoader {
                 MessageKey key = MessageKey.of(formatPath(child.path()));
                 // Make sure the name of the node key is not excluded from processing
                 message = applyReplacements(message, messageMap);
-                if (!polyglot.getConfig().getProcessExcluded().contains(String.valueOf(child.key()))) {
+                if (shouldProcess(node)) {
                     message = processMessage(message); // Apply color and formatting
                 }
                 messageMap.put(key, message);
@@ -71,6 +71,17 @@ public class MessageLoader {
                 loadChildrenRec(child, messageMap, depth + 1);
             }
         }
+    }
+
+    private boolean shouldProcess(ConfigurationNode node) {
+        String key = String.valueOf(node.key());
+        String path = formatPath(node.path());
+        for (String excluded : polyglot.getConfig().getProcessExcluded()) {
+            if (excluded.equals(key) || excluded.equals(path)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private Locale getLocaleFromFile(String fileName) {
