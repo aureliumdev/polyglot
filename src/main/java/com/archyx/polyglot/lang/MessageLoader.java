@@ -63,7 +63,7 @@ public class MessageLoader {
                 MessageKey key = MessageKey.of(formatPath(child.path()));
                 // Make sure the name of the node key is not excluded from processing
                 message = applyReplacements(message, messageMap);
-                if (shouldProcess(node)) {
+                if (shouldProcess(child)) {
                     message = processMessage(message); // Apply color and formatting
                 }
                 messageMap.put(key, message);
@@ -77,6 +77,12 @@ public class MessageLoader {
         String key = String.valueOf(node.key());
         String path = formatPath(node.path());
         for (String excluded : polyglot.getConfig().getProcessExcluded()) {
+            if (excluded.contains("*")) {
+                String withoutWildcard = TextUtil.replace(excluded, "*", "");
+                if (path.startsWith(withoutWildcard)) {
+                    return false;
+                }
+            }
             if (excluded.equals(key) || excluded.equals(path)) {
                 return false;
             }
