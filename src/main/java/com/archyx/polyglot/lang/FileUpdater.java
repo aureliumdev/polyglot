@@ -1,6 +1,7 @@
 package com.archyx.polyglot.lang;
 
 import com.archyx.polyglot.Polyglot;
+import com.archyx.polyglot.util.TextUtil;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
@@ -29,7 +30,12 @@ public class FileUpdater {
             InputStream embeddedInputStream = polyglot.getProvider().getResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName);
 
             if (embeddedInputStream == null) {
-                throw new IllegalArgumentException("No embedded message file with name " + fileName);
+                // Update using default messages file
+                String defFileName = TextUtil.replace(polyglot.getConfig().getMessageFileName(), "{language}", polyglot.getConfig().getDefaultLanguage());
+                embeddedInputStream = polyglot.getProvider().getResource(polyglot.getConfig().getMessageDirectory() + "/" + defFileName);
+                if (embeddedInputStream == null) {
+                    return;
+                }
             }
             CommentedConfigurationNode embeddedRoot = messageLoader.loadYamlFile(embeddedInputStream);
 
