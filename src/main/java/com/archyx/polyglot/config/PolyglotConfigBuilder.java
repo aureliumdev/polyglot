@@ -1,10 +1,6 @@
 package com.archyx.polyglot.config;
 
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class PolyglotConfigBuilder {
 
@@ -13,7 +9,6 @@ public class PolyglotConfigBuilder {
     private String messageDirectory;
     private String messageFileName;
     private MessageReplacements messageReplacements;
-    private List<String> processExcluded;
 
     public PolyglotConfigBuilder() {
         this.defaultLanguage = "en";
@@ -21,7 +16,6 @@ public class PolyglotConfigBuilder {
         this.messageDirectory = "messages";
         this.messageFileName = "messages_{language}.yml";
         this.messageReplacements = new MessageReplacements(new HashMap<>());
-        this.processExcluded = new ArrayList<>();
     }
 
     public PolyglotConfigBuilder defaultLanguage(String defaultLanguage) {
@@ -49,13 +43,8 @@ public class PolyglotConfigBuilder {
         return this;
     }
 
-    public PolyglotConfigBuilder processExcluded(@NotNull List<String> processExcluded) {
-        this.processExcluded = processExcluded;
-        return this;
-    }
-
     public PolyglotConfig build() {
-        return new PolyglotConfig(defaultLanguage, providedLanguages, messageDirectory, messageFileName, messageReplacements, processExcluded);
+        return new PolyglotConfig(defaultLanguage, providedLanguages, messageDirectory, messageFileName, messageReplacements);
     }
 
 }

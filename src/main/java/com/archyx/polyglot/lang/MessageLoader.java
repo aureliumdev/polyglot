@@ -15,12 +15,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class MessageLoader {
 
     private final Polyglot polyglot;
-    private final Pattern hexPattern = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public MessageLoader(Polyglot polyglot) {
         this.polyglot = polyglot;
@@ -63,31 +61,12 @@ public class MessageLoader {
                 MessageKey key = MessageKey.of(formatPath(child.path()));
                 // Make sure the name of the node key is not excluded from processing
                 message = applyReplacements(message, messageMap);
-                if (shouldProcess(child)) {
-                    message = processMessage(message); // Apply color and formatting
-                }
+                message = processMessage(message); // Apply color and formatting
                 messageMap.put(key, message);
             } else { // Node is a section
                 loadChildrenRec(child, messageMap, depth + 1);
             }
         }
-    }
-
-    private boolean shouldProcess(ConfigurationNode node) {
-        String key = String.valueOf(node.key());
-        String path = formatPath(node.path());
-        for (String excluded : polyglot.getConfig().getProcessExcluded()) {
-            if (excluded.contains("*")) {
-                String withoutWildcard = TextUtil.replace(excluded, "*", "");
-                if (path.startsWith(withoutWildcard)) {
-                    return false;
-                }
-            }
-            if (excluded.equals(key) || excluded.equals(path)) {
-                return false;
-            }
-        }
-        return true;
     }
 
     private Locale getLocaleFromFile(String fileName) {
@@ -132,10 +111,8 @@ public class MessageLoader {
     }
 
     private String processMessage(String input) {
-        String output = TextUtil.applyColor(input);
         // Replace newlines
-        output = output.replace("\\n", "\n");
-        return output;
+        return input.replace("\\n", "\n");
     }
 
     private String applyReplacements(String input, Map<MessageKey, String> messageMap) {

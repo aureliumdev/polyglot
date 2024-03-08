@@ -1,7 +1,5 @@
 package com.archyx.polyglot.config;
 
-import java.util.List;
-
 public class PolyglotConfig {
 
     private final String defaultLanguage;
@@ -9,15 +7,13 @@ public class PolyglotConfig {
     private final String messageDirectory;
     private final String messageFileName;
     private final MessageReplacements messageReplacements;
-    private final List<String> processExcluded;
 
-    public PolyglotConfig(String defaultLanguage, String[] providedLanguages, String messageDirectory, String messageFileName, MessageReplacements messageReplacements, List<String> processExcluded) {
+    public PolyglotConfig(String defaultLanguage, String[] providedLanguages, String messageDirectory, String messageFileName, MessageReplacements messageReplacements) {
         this.defaultLanguage = defaultLanguage;
         this.providedLanguages = providedLanguages;
         this.messageDirectory = messageDirectory;
         this.messageFileName = messageFileName;
         this.messageReplacements = messageReplacements;
-        this.processExcluded = processExcluded;
     }
 
     public String getDefaultLanguage() {
@@ -40,7 +36,4 @@ public class PolyglotConfig {
         return messageReplacements;
     }
 
-    public List<String> getProcessExcluded() {
-        return processExcluded;
-    }
 }

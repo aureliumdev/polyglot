@@ -1,9 +1,5 @@
 package com.archyx.polyglot.util;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -203,15 +199,6 @@ public class TextUtil {
 
     public static String capitalizeWord(final String str) {
         return capitalizeWord(str, null);
-    }
-
-    public static String applyColor(String input) {
-        input = replace(input, "§", "&");
-        MiniMessage mm = MiniMessage.miniMessage();
-        Component component = mm.deserialize(input);
-        String output = LegacyComponentSerializer.builder().hexColors().build()
-                .serialize(component);
-        return applyLegacyColorCodes(output);
     }
 
     public static String applyLegacyColorCodes(String message) {
