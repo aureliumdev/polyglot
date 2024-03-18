@@ -5,7 +5,9 @@ import com.archyx.polyglot.util.TextUtil;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.loader.HeaderMode;
 import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.File;
@@ -13,6 +15,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class FileUpdater {
 
@@ -26,7 +29,13 @@ public class FileUpdater {
 
     public void updateFile(File file, String fileName, List<MessageUpdate> messageUpdates) {
         try {
-            CommentedConfigurationNode userRoot = messageLoader.loadYamlFile(file);
+            YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                    .path(file.toPath())
+                    .nodeStyle(NodeStyle.BLOCK)
+                    .headerMode(HeaderMode.PRESERVE)
+                    .indent(2)
+                    .build();
+            CommentedConfigurationNode userRoot = loader.load();
             InputStream embeddedInputStream = polyglot.getProvider().getResource(polyglot.getConfig().getMessageDirectory() + "/" + fileName);
 
             if (embeddedInputStream == null) {
@@ -49,13 +58,13 @@ public class FileUpdater {
             int userFileVersion = userRoot.node("file_version").getInt();
             int embeddedFileVersion = embeddedRoot.node("file_version").getInt();
 
-            int keysAdded = 0;
+            AtomicInteger keysAdded = new AtomicInteger();
             // If user file is up-to-date, return
             if (userFileVersion == embeddedFileVersion) {
                 return;
             }
 
-            keysAdded = updateChildren(embeddedRoot, userRoot, keysAdded); // Recursively update messages
+            updateChildren(embeddedRoot, userRoot, keysAdded); // Recursively update messages
 
             // Apply message update overrides
             applyMessageUpdates(messageUpdates, userRoot, embeddedRoot, userFileVersion, embeddedFileVersion, fileName);
@@ -64,19 +73,16 @@ public class FileUpdater {
             userRoot.node("file_version").set(embeddedFileVersion);
 
             // Save updated user file
-            YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
-                    .file(file)
-                    .build();
             loader.save(userRoot);
 
-            polyglot.getProvider().logInfo(fileName + " was updated to a new file version, " + keysAdded + " new keys were added.");
+            polyglot.getProvider().logInfo(fileName + " was updated to a new file version, " + keysAdded.get() + " new keys were added.");
         } catch (Exception e) {
             polyglot.getProvider().logWarn("Error updating file " + file.getName());
             e.printStackTrace();
         }
     }
 
-    private int updateChildren(ConfigurationNode embedded, ConfigurationNode userRoot, int keysAdded) throws SerializationException {
+    private void updateChildren(ConfigurationNode embedded, ConfigurationNode userRoot, AtomicInteger keysAdded) throws SerializationException {
         for (ConfigurationNode child : embedded.childrenMap().values()) {
             // Skip file_version node
             if ("file_version".equals(child.key())) {
@@ -86,13 +92,12 @@ public class FileUpdater {
             if (message != null) { // Node is a message
                 if (userRoot.node(child.path()).virtual()) { // User file does not have the embedded path
                     userRoot.node(child.path()).set(message); // Add embedded message to user file
-                    keysAdded++;
+                    keysAdded.incrementAndGet();
                 }
             } else { // Node is a section
-                return updateChildren(child, userRoot, keysAdded);
+                updateChildren(child, userRoot, keysAdded);
             }
         }
-        return keysAdded;
     }
 
     private void applyMessageUpdates(List<MessageUpdate> messageUpdates, ConfigurationNode userRoot, ConfigurationNode embeddedRoot, int userVersion, int embeddedVersion, String fileName) throws SerializationException {

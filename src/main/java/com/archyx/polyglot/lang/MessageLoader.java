@@ -7,6 +7,8 @@ import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.NodePath;
+import org.spongepowered.configurate.loader.HeaderMode;
+import org.spongepowered.configurate.yaml.NodeStyle;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.BufferedReader;
@@ -97,6 +99,9 @@ public class MessageLoader {
 
         YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
                 .path(path)
+                .headerMode(HeaderMode.PRESERVE)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(2)
                 .build();
 
         return loader.load();
@@ -104,6 +109,9 @@ public class MessageLoader {
 
     public CommentedConfigurationNode loadYamlFile(InputStream is) throws ConfigurateException {
         YamlConfigurationLoader loader = YamlConfigurationLoader.builder()
+                .headerMode(HeaderMode.PRESERVE)
+                .nodeStyle(NodeStyle.BLOCK)
+                .indent(2)
                 .source(() -> new BufferedReader(new InputStreamReader(is)))
                 .build();
 
