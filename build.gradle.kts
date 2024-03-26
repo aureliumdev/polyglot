@@ -8,13 +8,13 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains:annotations:23.0.0")
-    implementation("net.kyori:adventure-text-minimessage:4.11.0")
-    implementation("net.kyori:adventure-api:4.13.0")
-    implementation("net.kyori:adventure-text-serializer-legacy:4.13.1")
+    implementation("net.kyori:adventure-text-minimessage:4.14.0")
+    implementation("net.kyori:adventure-api:4.14.0")
+    implementation("net.kyori:adventure-text-serializer-legacy:4.14.0")
     implementation("org.spongepowered:configurate-yaml:4.1.2")
+    compileOnly("org.jetbrains:annotations:24.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation(platform("org.junit:junit-bom:5.9.3"))
+    testImplementation(platform("org.junit:junit-bom:5.10.1"))
 }
 
 group = "com.archyx"
