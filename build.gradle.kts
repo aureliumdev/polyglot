@@ -1,5 +1,5 @@
 plugins {
-    java
+    `java-library`
     `maven-publish`
 }
 
@@ -8,14 +8,14 @@ repositories {
 }
 
 dependencies {
-    implementation("org.spongepowered:configurate-yaml:4.1.2")
+    api("org.spongepowered:configurate-yaml:4.1.2")
     compileOnly("org.jetbrains:annotations:24.1.0")
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation(platform("org.junit:junit-bom:5.10.2"))
 }
 
 group = "com.archyx"
-version = "1.2.0"
+version = "1.2.1"
 description = "Polyglot"
 java.sourceCompatibility = JavaVersion.VERSION_17
 
@@ -25,7 +25,7 @@ publishing {
     }
 }
 
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
