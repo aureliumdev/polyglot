@@ -41,7 +41,7 @@ public class MessageLoader {
         }
 
         CommentedConfigurationNode root = loadYamlFile(is);
-        return loadFromNode(root, new Locale(defaultLanguageCode), defaultLanguageCode);
+        return loadFromNode(root, Locale.forLanguageTag(defaultLanguageCode), defaultLanguageCode);
     }
 
     private LangMessages loadFromNode(CommentedConfigurationNode root, Locale locale, String languageCode) {
@@ -76,7 +76,7 @@ public class MessageLoader {
             return Locale.ROOT;
         }
         String localeName = getLanguageCode(fileName);
-        return new Locale(localeName);
+        return Locale.forLanguageTag(localeName);
     }
 
     private String getLanguageCode(String fileName) {

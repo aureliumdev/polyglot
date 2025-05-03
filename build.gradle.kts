@@ -15,9 +15,14 @@ dependencies {
 }
 
 group = "com.archyx"
-version = "1.2.1"
+version = "1.2.2"
 description = "Polyglot"
-java.sourceCompatibility = JavaVersion.VERSION_17
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
 
 publishing {
     publications.create<MavenPublication>("maven") {

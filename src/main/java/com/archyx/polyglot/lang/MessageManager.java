@@ -26,7 +26,7 @@ public class MessageManager {
         this.messageLoader = new MessageLoader(polyglot);
         this.fileUpdater = new FileUpdater(polyglot, messageLoader);
         this.defaultLanguageCode = polyglot.getConfig().getDefaultLanguage();
-        this.defaultLanguage = new Locale(defaultLanguageCode);
+        this.defaultLanguage = Locale.forLanguageTag(defaultLanguageCode);
         this.langMessagesMap = new HashMap<>();
         this.messageUpdates = new ArrayList<>();
     }
