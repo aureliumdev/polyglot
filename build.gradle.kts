@@ -15,7 +15,7 @@ dependencies {
 }
 
 group = "com.archyx"
-version = "1.2.2"
+version = "1.2.3"
 description = "Polyglot"
 
 java {
