@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 public class MessageManager {
@@ -135,7 +136,7 @@ public class MessageManager {
         generateMessageFiles();
         File[] messageFiles = messagesDir.listFiles();
         if (messageFiles == null) return;
-        int numLoaded = 0;
+        AtomicInteger numLoaded = new AtomicInteger();
         for (File file : messageFiles) {
             if (!file.getName().endsWith(".yml")) continue;
 
@@ -150,10 +151,10 @@ public class MessageManager {
 
             try {
                 // Load and add messages to map
-                LangMessages langMessages = messageLoader.loadMessageFile(file);
-
-                langMessagesMap.put(langMessages.getLocale(), langMessages);
-                numLoaded++;
+                messageLoader.loadMessageFile(file).ifPresent(langMessages -> {
+                    langMessagesMap.put(langMessages.getLocale(), langMessages);
+                    numLoaded.getAndIncrement();
+                });
             } catch (Exception e) {
                 polyglot.getProvider().logWarn("Error loading message file " + file.getName());
                 e.printStackTrace();

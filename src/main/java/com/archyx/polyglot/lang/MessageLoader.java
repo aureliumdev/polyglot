@@ -3,6 +3,9 @@ package com.archyx.polyglot.lang;
 import com.archyx.polyglot.Polyglot;
 import com.archyx.polyglot.config.MessageReplacements;
 import com.archyx.polyglot.util.TextUtil;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -17,6 +20,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.Locale.Builder;
 
 public class MessageLoader {
 
@@ -26,11 +30,14 @@ public class MessageLoader {
         this.polyglot = polyglot;
     }
 
-    public LangMessages loadMessageFile(File file) throws Exception {
+    public Optional<LangMessages> loadMessageFile(File file) throws Exception {
         Locale locale = getLocaleFromFile(file.getName());
+        if (locale == null) {
+            return Optional.empty();
+        }
         CommentedConfigurationNode root = loadYamlFile(file);
 
-        return loadFromNode(root, locale, getLanguageCode(file.getName()));
+        return Optional.of(loadFromNode(root, locale, getLanguageCode(file.getName())));
     }
 
     public LangMessages loadEmbeddedMessages(String defaultLanguageCode) throws Exception {
@@ -44,7 +51,7 @@ public class MessageLoader {
         return loadFromNode(root, Locale.forLanguageTag(defaultLanguageCode), defaultLanguageCode);
     }
 
-    private LangMessages loadFromNode(CommentedConfigurationNode root, Locale locale, String languageCode) {
+    private LangMessages loadFromNode(CommentedConfigurationNode root, @NotNull Locale locale, @NotNull String languageCode) {
         Map<MessageKey, String> messageMap = new HashMap<>();
 
         loadChildrenRec(root, messageMap, 0);
@@ -71,12 +78,19 @@ public class MessageLoader {
         }
     }
 
-    private Locale getLocaleFromFile(String fileName) {
+    @VisibleForTesting
+    @Nullable
+    public Locale getLocaleFromFile(String fileName) {
         if (fileName.equals("global.yml")) {
             return Locale.ROOT;
         }
         String localeName = getLanguageCode(fileName);
-        return Locale.forLanguageTag(localeName);
+        try {
+            return new Builder().setLanguageTag(localeName).build();
+        } catch (IllformedLocaleException e) {
+            polyglot.getProvider().logWarn("Invalid language tag: " + localeName);
+            return null;
+        }
     }
 
     private String getLanguageCode(String fileName) {
